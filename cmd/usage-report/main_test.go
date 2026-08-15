@@ -18,3 +18,18 @@ func TestRunWritesUsageReport(t *testing.T) {
 		t.Fatalf("run() output = %q, want %q", got, want)
 	}
 }
+
+func TestRunStopsWritingAtTimeout(t *testing.T) {
+	inputPath := filepath.Join("..", "..", "examples", "sample.json")
+
+	if err := run(inputPath, time.Millisecond, slowWriter{}); err == nil {
+		t.Fatal("run() error = nil, want context deadline exceeded")
+	}
+}
+
+type slowWriter struct{}
+
+func (slowWriter) Write(p []byte) (int, error) {
+	time.Sleep(5 * time.Millisecond)
+	return len(p), nil
+}

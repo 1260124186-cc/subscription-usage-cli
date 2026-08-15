@@ -1,6 +1,7 @@
 package output
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -8,6 +9,13 @@ import (
 )
 
 func WriteText(writer io.Writer, report domain.Report) error {
+	return WriteTextContext(context.Background(), writer, report)
+}
+
+func WriteTextContext(ctx context.Context, writer io.Writer, report domain.Report) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	for _, account := range report.Accounts {
 		if _, err := fmt.Fprintf(
 			writer,
