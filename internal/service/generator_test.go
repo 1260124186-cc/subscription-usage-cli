@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/1260124186-cc/subscription-usage-cli/internal/domain"
@@ -39,7 +40,30 @@ func TestGenerateCalculatesIncludedAndOverageUsage(t *testing.T) {
 func TestGenerateRejectsNilAccount(t *testing.T) {
 	snapshot := store.Snapshot{Accounts: []*domain.Account{nil}}
 
-	if _, err := service.NewReportGenerator().Generate(context.Background(), snapshot); err == nil {
+	_, err := service.NewReportGenerator().Generate(context.Background(), snapshot)
+	if err == nil {
 		t.Fatal("Generate() error = nil, want an error for a nil account")
+	}
+	if got, want := err.Error(), "validate snapshot: account at index 0 is null"; got != want {
+		t.Fatalf("Generate() error = %q, want %q", got, want)
+	}
+}
+
+func TestGenerateRejectsUsageForUnknownAccount(t *testing.T) {
+	snapshot := store.Snapshot{
+		Accounts: storeAccounts{
+			{ID: "acme", Plan: "starter", IncludedUnits: 100, UnitPriceCents: 7},
+		}.domainAccounts(),
+		Usage: storeUsageEvents{
+			{ID: "evt-1", AccountID: "missing", Units: 1},
+		}.domainUsage(),
+	}
+
+	_, err := service.NewReportGenerator().Generate(context.Background(), snapshot)
+	if err == nil {
+		t.Fatal("Generate() error = nil, want an error for usage with an unknown account")
+	}
+	if !strings.Contains(err.Error(), `usage event "evt-1" references unknown account "missing"`) {
+		t.Fatalf("Generate() error = %q, want an unknown-account error", err)
 	}
 }

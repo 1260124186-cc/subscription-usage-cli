@@ -28,9 +28,12 @@ func LoadSnapshot(reader io.Reader) (Snapshot, error) {
 
 func (s Snapshot) Validate() error {
 	knownAccounts := make(map[string]struct{}, len(s.Accounts))
-	for _, account := range s.Accounts {
+	for index, account := range s.Accounts {
+		if account == nil {
+			return fmt.Errorf("account at index %d is null", index)
+		}
 		if err := account.Validate(); err != nil {
-			return err
+			return fmt.Errorf("account at index %d: %w", index, err)
 		}
 		if _, exists := knownAccounts[account.ID]; exists {
 			return fmt.Errorf("duplicate account %q", account.ID)

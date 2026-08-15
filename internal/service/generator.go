@@ -19,6 +19,9 @@ func (ReportGenerator) Generate(ctx context.Context, snapshot store.Snapshot) (d
 	if err := ctx.Err(); err != nil {
 		return domain.Report{}, err
 	}
+	if err := snapshot.Validate(); err != nil {
+		return domain.Report{}, fmt.Errorf("validate snapshot: %w", err)
+	}
 
 	accounts := make(map[string]domain.Account, len(snapshot.Accounts))
 	for _, account := range snapshot.Accounts {
