@@ -20,8 +20,9 @@ func (ReportGenerator) Generate(ctx context.Context, snapshot store.Snapshot) (d
 		return domain.Report{}, err
 	}
 
-	sort.Slice(snapshot.Usage, func(i, j int) bool {
-		return snapshot.Usage[i].ID < snapshot.Usage[j].ID
+	usage := append([]domain.UsageEvent(nil), snapshot.Usage...)
+	sort.Slice(usage, func(i, j int) bool {
+		return usage[i].ID < usage[j].ID
 	})
 
 	accounts := make(map[string]domain.Account, len(snapshot.Accounts))
@@ -30,7 +31,7 @@ func (ReportGenerator) Generate(ctx context.Context, snapshot store.Snapshot) (d
 	}
 
 	usedByAccount := make(map[string]int64, len(accounts))
-	for _, usage := range snapshot.Usage {
+	for _, usage := range usage {
 		if err := ctx.Err(); err != nil {
 			return domain.Report{}, err
 		}

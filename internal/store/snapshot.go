@@ -51,6 +51,6 @@ func (s Snapshot) Validate() error {
 func (s Snapshot) Clone() Snapshot {
 	clone := s
 	clone.Accounts = append([]domain.Account(nil), s.Accounts...)
-	clone.Usage = s.Usage
+	clone.Usage = append([]domain.UsageEvent(nil), s.Usage...)
 	return clone
 }
