@@ -1,0 +1,28 @@
+{
+  "accounts": [
+    {
+      "id": "acme",
+      "plan": "starter",
+      "included_units": 100,
+      "unit_price_cents": 7
+    },
+    {
+      "id": "beta",
+      "plan": "team",
+      "included_units": 10,
+      "unit_price_cents": 15
+    }
+  ],
+  "usage": [
+    {
+      "id": "evt-001",
+      "account_id": "acme",
+      "units": 125
+    },
+    {
+      "id": "evt-002",
+      "account_id": "beta",
+      "units": 4
+    }
+  ]
+}

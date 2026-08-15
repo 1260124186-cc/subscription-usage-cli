@@ -1,0 +1,27 @@
+package output
+
+import (
+	"fmt"
+	"io"
+
+	"github.com/zhangchengcheng/subscription-usage-cli/internal/domain"
+)
+
+func WriteText(writer io.Writer, report domain.Report) error {
+	for _, account := range report.Accounts {
+		if _, err := fmt.Fprintf(
+			writer,
+			"account=%s plan=%s used=%d included=%d overage=%d charge_cents=%d\n",
+			account.AccountID,
+			account.Plan,
+			account.UsedUnits,
+			account.IncludedUnits,
+			account.OverageUnits,
+			account.ChargeCents,
+		); err != nil {
+			return err
+		}
+	}
+	_, err := fmt.Fprintf(writer, "total_charge_cents=%d\n", report.TotalChargeCents)
+	return err
+}

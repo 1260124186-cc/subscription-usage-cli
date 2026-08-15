@@ -1,0 +1,10 @@
+.git
+.codex
+*.patch
+*.diff
+*.out
+*.test
+bin/
+tmp/
+coverage/
+BUG_REPRO.md
