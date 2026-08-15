@@ -8,10 +8,11 @@ type storeUsage domain.UsageEvent
 type storeAccounts []storeAccount
 type storeUsageEvents []storeUsage
 
-func (accounts storeAccounts) domainAccounts() []domain.Account {
-	result := make([]domain.Account, len(accounts))
+func (accounts storeAccounts) domainAccounts() []*domain.Account {
+	result := make([]*domain.Account, len(accounts))
 	for i := range accounts {
-		result[i] = domain.Account(accounts[i])
+		account := domain.Account(accounts[i])
+		result[i] = &account
 	}
 	return result
 }

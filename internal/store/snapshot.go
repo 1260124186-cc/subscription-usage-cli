@@ -9,7 +9,7 @@ import (
 )
 
 type Snapshot struct {
-	Accounts []domain.Account    `json:"accounts"`
+	Accounts []*domain.Account   `json:"accounts"`
 	Usage    []domain.UsageEvent `json:"usage"`
 }
 

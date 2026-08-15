@@ -22,7 +22,7 @@ func (ReportGenerator) Generate(ctx context.Context, snapshot store.Snapshot) (d
 
 	accounts := make(map[string]domain.Account, len(snapshot.Accounts))
 	for _, account := range snapshot.Accounts {
-		accounts[account.ID] = account
+		accounts[account.ID] = *account
 	}
 
 	usedByAccount := make(map[string]int64, len(accounts))

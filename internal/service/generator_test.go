@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/1260124186-cc/subscription-usage-cli/internal/domain"
 	"github.com/1260124186-cc/subscription-usage-cli/internal/service"
 	"github.com/1260124186-cc/subscription-usage-cli/internal/store"
 )
@@ -32,5 +33,13 @@ func TestGenerateCalculatesIncludedAndOverageUsage(t *testing.T) {
 	}
 	if got, want := report.Accounts[0].OverageUnits, int64(25); got != want {
 		t.Fatalf("acme overage = %d, want %d", got, want)
+	}
+}
+
+func TestGenerateRejectsNilAccount(t *testing.T) {
+	snapshot := store.Snapshot{Accounts: []*domain.Account{nil}}
+
+	if _, err := service.NewReportGenerator().Generate(context.Background(), snapshot); err == nil {
+		t.Fatal("Generate() error = nil, want an error for a nil account")
 	}
 }
