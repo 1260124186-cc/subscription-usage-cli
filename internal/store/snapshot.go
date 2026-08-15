@@ -26,6 +26,11 @@ func LoadSnapshot(reader io.Reader) (Snapshot, error) {
 	return snapshot, nil
 }
 
+func LoadSnapshotFile(reader io.ReadCloser) (Snapshot, error) {
+	defer reader.Close()
+	return LoadSnapshot(reader)
+}
+
 func (s Snapshot) Validate() error {
 	knownAccounts := make(map[string]struct{}, len(s.Accounts))
 	for _, account := range s.Accounts {

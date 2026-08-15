@@ -32,13 +32,13 @@ func run(inputPath string, timeout time.Duration, stdout io.Writer) (err error) 
 	if err != nil {
 		return fmt.Errorf("open input: %w", err)
 	}
-	defer func() {
-		if closeErr := file.Close(); err == nil && closeErr != nil {
-			err = fmt.Errorf("close input: %w", closeErr)
-		}
-	}()
+	return runWithInput(file, timeout, stdout)
+}
 
-	snapshot, err := store.LoadSnapshot(file)
+func runWithInput(input io.ReadCloser, timeout time.Duration, stdout io.Writer) (err error) {
+	defer input.Close()
+
+	snapshot, err := store.LoadSnapshotFile(input)
 	if err != nil {
 		return fmt.Errorf("load input: %w", err)
 	}

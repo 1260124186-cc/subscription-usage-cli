@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io"
 	"path/filepath"
 	"testing"
 	"time"
@@ -17,4 +18,25 @@ func TestRunWritesUsageReport(t *testing.T) {
 	if got, want := output.String(), "account=acme plan=starter used=125 included=100 overage=25 charge_cents=175\naccount=beta plan=team used=4 included=10 overage=0 charge_cents=0\ntotal_charge_cents=175\n"; got != want {
 		t.Fatalf("run() output = %q, want %q", got, want)
 	}
+}
+
+func TestRunWithInputClosesInputOnce(t *testing.T) {
+	input := &countedInput{Reader: bytes.NewBufferString(`{"accounts":[],"usage":[]}`)}
+
+	if err := runWithInput(input, time.Second, &bytes.Buffer{}); err != nil {
+		t.Fatalf("runWithInput() error = %v", err)
+	}
+	if got, want := input.closes, 1; got != want {
+		t.Fatalf("input Close() calls = %d, want %d", got, want)
+	}
+}
+
+type countedInput struct {
+	io.Reader
+	closes int
+}
+
+func (input *countedInput) Close() error {
+	input.closes++
+	return nil
 }
