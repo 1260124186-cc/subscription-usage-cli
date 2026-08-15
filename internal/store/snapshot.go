@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/domain"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/domain"
 )
 
 type Snapshot struct {

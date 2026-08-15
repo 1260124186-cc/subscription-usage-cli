@@ -1,6 +1,6 @@
 package service_test
 
-import "github.com/zhangchengcheng/subscription-usage-cli/internal/domain"
+import "github.com/1260124186-cc/subscription-usage-cli/internal/domain"
 
 type storeAccount domain.Account
 type storeUsage domain.UsageEvent

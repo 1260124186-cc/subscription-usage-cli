@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/output"
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/service"
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/store"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/output"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/service"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/store"
 )
 
 func main() {

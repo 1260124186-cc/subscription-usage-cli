@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/domain"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/domain"
 )
 
 func TestWriteText(t *testing.T) {

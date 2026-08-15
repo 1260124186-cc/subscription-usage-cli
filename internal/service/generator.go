@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/domain"
-	"github.com/zhangchengcheng/subscription-usage-cli/internal/store"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/domain"
+	"github.com/1260124186-cc/subscription-usage-cli/internal/store"
 )
 
 type ReportGenerator struct{}
