@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"path/filepath"
 	"testing"
@@ -31,12 +32,28 @@ func TestRunWithInputClosesInputOnce(t *testing.T) {
 	}
 }
 
+func TestRunWithInputReturnsCloseError(t *testing.T) {
+	closeErr := errors.New("input close failed")
+	input := &countedInput{
+		Reader:   bytes.NewBufferString(`{"accounts":[],"usage":[]}`),
+		closeErr: closeErr,
+	}
+
+	if err := runWithInput(input, time.Second, &bytes.Buffer{}); !errors.Is(err, closeErr) {
+		t.Fatalf("runWithInput() error = %v, want the input close error", err)
+	}
+	if got, want := input.closes, 1; got != want {
+		t.Fatalf("input Close() calls = %d, want %d", got, want)
+	}
+}
+
 type countedInput struct {
 	io.Reader
-	closes int
+	closes   int
+	closeErr error
 }
 
 func (input *countedInput) Close() error {
 	input.closes++
-	return nil
+	return input.closeErr
 }

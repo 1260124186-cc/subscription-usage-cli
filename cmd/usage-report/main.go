@@ -36,8 +36,6 @@ func run(inputPath string, timeout time.Duration, stdout io.Writer) (err error) 
 }
 
 func runWithInput(input io.ReadCloser, timeout time.Duration, stdout io.Writer) (err error) {
-	defer input.Close()
-
 	snapshot, err := store.LoadSnapshotFile(input)
 	if err != nil {
 		return fmt.Errorf("load input: %w", err)

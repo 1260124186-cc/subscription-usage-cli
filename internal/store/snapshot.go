@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -26,8 +27,13 @@ func LoadSnapshot(reader io.Reader) (Snapshot, error) {
 	return snapshot, nil
 }
 
-func LoadSnapshotFile(reader io.ReadCloser) (Snapshot, error) {
-	defer reader.Close()
+func LoadSnapshotFile(reader io.ReadCloser) (snapshot Snapshot, err error) {
+	defer func() {
+		if closeErr := reader.Close(); closeErr != nil {
+			err = errors.Join(err, fmt.Errorf("close snapshot input: %w", closeErr))
+		}
+	}()
+
 	return LoadSnapshot(reader)
 }
 
