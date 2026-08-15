@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -21,28 +22,39 @@ func main() {
 		exitf("missing required -input")
 	}
 
-	file, err := os.Open(*inputPath)
-	if err != nil {
-		exitf("open input: %v", err)
+	if err := run(*inputPath, *timeout, os.Stdout); err != nil {
+		exitf("%v", err)
 	}
-	defer file.Close()
+}
+
+func run(inputPath string, timeout time.Duration, stdout io.Writer) (err error) {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return fmt.Errorf("open input: %w", err)
+	}
+	defer func() {
+		if closeErr := file.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("close input: %w", closeErr)
+		}
+	}()
 
 	snapshot, err := store.LoadSnapshot(file)
 	if err != nil {
-		exitf("load input: %v", err)
+		return fmt.Errorf("load input: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	report, err := service.NewReportGenerator().Generate(ctx, snapshot)
 	if err != nil {
-		exitf("generate report: %v", err)
+		return fmt.Errorf("generate report: %w", err)
 	}
 
-	if err := output.WriteText(os.Stdout, report); err != nil {
-		exitf("write report: %v", err)
+	if err := output.WriteText(stdout, report); err != nil {
+		return fmt.Errorf("write report: %w", err)
 	}
+	return nil
 }
 
 func exitf(format string, args ...any) {
