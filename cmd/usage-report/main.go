@@ -51,7 +51,9 @@ func run(inputPath string, timeout time.Duration, stdout io.Writer) (err error) 
 		return fmt.Errorf("generate report: %w", err)
 	}
 
-	output.WriteText(stdout, report)
+	if err := output.WriteText(stdout, report); err != nil {
+		return fmt.Errorf("write report: %w", err)
+	}
 	return nil
 }
 

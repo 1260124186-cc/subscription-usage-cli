@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -22,14 +23,21 @@ func TestRunWritesUsageReport(t *testing.T) {
 
 func TestRunReturnsOutputWriteError(t *testing.T) {
 	inputPath := filepath.Join("..", "..", "examples", "sample.json")
+	writeErr := errors.New("report destination unavailable")
 
-	if err := run(inputPath, time.Second, failWriter{}); err == nil {
-		t.Fatal("run() error = nil, want an output write error")
+	err := run(inputPath, time.Second, failWriter{err: writeErr})
+	if !errors.Is(err, writeErr) {
+		t.Fatalf("run() error = %v, want %v", err, writeErr)
+	}
+	if !strings.Contains(err.Error(), "write report") {
+		t.Fatalf("run() error = %q, want write report context", err)
 	}
 }
 
-type failWriter struct{}
+type failWriter struct {
+	err error
+}
 
-func (failWriter) Write([]byte) (int, error) {
-	return 0, errors.New("report destination unavailable")
+func (w failWriter) Write([]byte) (int, error) {
+	return 0, w.err
 }

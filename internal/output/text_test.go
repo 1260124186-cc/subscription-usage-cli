@@ -28,24 +28,32 @@ func TestWriteText(t *testing.T) {
 }
 
 func TestWriteTextReturnsDetailWriteError(t *testing.T) {
-	report := domain.Report{Accounts: []domain.AccountReport{{
-		AccountID: "acme", Plan: "starter", UsedUnits: 125,
-		IncludedUnits: 100, OverageUnits: 25, ChargeCents: 175,
-	}}}
+	detailErr := errors.New("detail sink unavailable")
+	report := domain.Report{Accounts: []domain.AccountReport{
+		{AccountID: "acme", Plan: "starter", UsedUnits: 125, IncludedUnits: 100, OverageUnits: 25, ChargeCents: 175},
+		{AccountID: "beta", Plan: "team", UsedUnits: 4, IncludedUnits: 10, OverageUnits: 0, ChargeCents: 0},
+	}}
 
-	if err := WriteText(&failFirstWriter{}, report); err == nil {
-		t.Fatal("WriteText() error = nil, want the account write error")
+	writer := failOnWriteWriter{failAt: 2, err: detailErr}
+	err := WriteText(&writer, report)
+	if !errors.Is(err, detailErr) {
+		t.Fatalf("WriteText() error = %v, want %v", err, detailErr)
+	}
+	if got, want := writer.writes, 2; got != want {
+		t.Fatalf("writes = %d, want %d; WriteText should stop after the failed account detail", got, want)
 	}
 }
 
-type failFirstWriter struct {
+type failOnWriteWriter struct {
 	writes int
+	failAt int
+	err    error
 }
 
-func (w *failFirstWriter) Write(p []byte) (int, error) {
+func (w *failOnWriteWriter) Write(p []byte) (int, error) {
 	w.writes++
-	if w.writes == 1 {
-		return 0, errors.New("detail sink unavailable")
+	if w.writes == w.failAt {
+		return 0, w.err
 	}
 	return len(p), nil
 }
