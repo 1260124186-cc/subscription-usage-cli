@@ -9,7 +9,7 @@ import (
 
 func WriteText(writer io.Writer, report domain.Report) error {
 	for _, account := range report.Accounts {
-		if _, err := fmt.Fprintf(
+		fmt.Fprintf(
 			writer,
 			"account=%s plan=%s used=%d included=%d overage=%d charge_cents=%d\n",
 			account.AccountID,
@@ -18,9 +18,7 @@ func WriteText(writer io.Writer, report domain.Report) error {
 			account.IncludedUnits,
 			account.OverageUnits,
 			account.ChargeCents,
-		); err != nil {
-			return err
-		}
+		)
 	}
 	_, err := fmt.Fprintf(writer, "total_charge_cents=%d\n", report.TotalChargeCents)
 	return err

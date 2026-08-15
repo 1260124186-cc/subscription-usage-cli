@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -17,4 +18,18 @@ func TestRunWritesUsageReport(t *testing.T) {
 	if got, want := output.String(), "account=acme plan=starter used=125 included=100 overage=25 charge_cents=175\naccount=beta plan=team used=4 included=10 overage=0 charge_cents=0\ntotal_charge_cents=175\n"; got != want {
 		t.Fatalf("run() output = %q, want %q", got, want)
 	}
+}
+
+func TestRunReturnsOutputWriteError(t *testing.T) {
+	inputPath := filepath.Join("..", "..", "examples", "sample.json")
+
+	if err := run(inputPath, time.Second, failWriter{}); err == nil {
+		t.Fatal("run() error = nil, want an output write error")
+	}
+}
+
+type failWriter struct{}
+
+func (failWriter) Write([]byte) (int, error) {
+	return 0, errors.New("report destination unavailable")
 }
