@@ -22,7 +22,7 @@ func main() {
 		exitf("missing required -input")
 	}
 
-	if err := run(*inputPath, *timeout, os.Stdout); err != nil {
+	if err := run(*inputPath, *timeout, output.NewContextWriteCloser(os.Stdout)); err != nil {
 		exitf("%v", err)
 	}
 }
@@ -51,7 +51,7 @@ func run(inputPath string, timeout time.Duration, stdout io.Writer) (err error) 
 		return fmt.Errorf("generate report: %w", err)
 	}
 
-	if err := output.WriteText(stdout, report); err != nil {
+	if err := output.WriteTextContext(ctx, stdout, report); err != nil {
 		return fmt.Errorf("write report: %w", err)
 	}
 	return nil

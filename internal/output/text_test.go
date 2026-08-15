@@ -3,6 +3,8 @@ package output
 import (
 	"bytes"
 	"context"
+	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -39,6 +41,29 @@ func TestWriteTextContextStopsAfterCancellation(t *testing.T) {
 	}
 }
 
+func TestContextWriteCloserStopsActiveWriteAtDeadline(t *testing.T) {
+	report := domain.Report{Accounts: []domain.AccountReport{{
+		AccountID: "acme", Plan: "starter", UsedUnits: 125,
+		IncludedUnits: 100, OverageUnits: 25, ChargeCents: 175,
+	}}}
+	writer := newBlockingWriteCloser()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	defer cancel()
+
+	err := WriteTextContext(ctx, NewContextWriteCloser(writer), report)
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("WriteTextContext() error = %v, want context deadline exceeded", err)
+	}
+	select {
+	case <-writer.exited:
+	default:
+		t.Fatal("write was still running after WriteTextContext() returned")
+	}
+	if writer.completed {
+		t.Fatal("write completed after the context deadline")
+	}
+}
+
 type cancelAfterInitialCheck struct {
 	checks int
 }
@@ -60,5 +85,41 @@ func (c *cancelAfterInitialCheck) Err() error {
 }
 
 func (c cancelAfterInitialCheck) Value(any) any {
+	return nil
+}
+
+type blockingWriteCloser struct {
+	closeOnce sync.Once
+	closed    chan struct{}
+	exited    chan struct{}
+	completed bool
+}
+
+func newBlockingWriteCloser() *blockingWriteCloser {
+	return &blockingWriteCloser{
+		closed: make(chan struct{}),
+		exited: make(chan struct{}),
+	}
+}
+
+func (w *blockingWriteCloser) Write(p []byte) (int, error) {
+	defer close(w.exited)
+
+	timer := time.NewTimer(200 * time.Millisecond)
+	defer timer.Stop()
+
+	select {
+	case <-w.closed:
+		return 0, errors.New("writer closed")
+	case <-timer.C:
+		w.completed = true
+		return len(p), nil
+	}
+}
+
+func (w *blockingWriteCloser) Close() error {
+	w.closeOnce.Do(func() {
+		close(w.closed)
+	})
 	return nil
 }
