@@ -20,6 +20,10 @@ func (ReportGenerator) Generate(ctx context.Context, snapshot store.Snapshot) (d
 		return domain.Report{}, err
 	}
 
+	sort.Slice(snapshot.Usage, func(i, j int) bool {
+		return snapshot.Usage[i].ID < snapshot.Usage[j].ID
+	})
+
 	accounts := make(map[string]domain.Account, len(snapshot.Accounts))
 	for _, account := range snapshot.Accounts {
 		accounts[account.ID] = account

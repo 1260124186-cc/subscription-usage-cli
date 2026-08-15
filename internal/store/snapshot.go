@@ -47,3 +47,10 @@ func (s Snapshot) Validate() error {
 	}
 	return nil
 }
+
+func (s Snapshot) Clone() Snapshot {
+	clone := s
+	clone.Accounts = append([]domain.Account(nil), s.Accounts...)
+	clone.Usage = s.Usage
+	return clone
+}
